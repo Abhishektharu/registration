@@ -1,8 +1,10 @@
+
 import java.awt.event.*;
 import java.sql.SQLException;
 import javax.swing.*;
 
 public class RegistrationController {
+
     public RegistrationController(RegistrationModel model, RegistrationView view) {
         view.txtAge.addKeyListener(new KeyAdapter() {
             @Override
@@ -25,9 +27,12 @@ public class RegistrationController {
                     try {
                         RegistrationModel.saveRegistration(view.txtName.getText().trim(),
                                 view.rdoFemale.isSelected() ? "Female"
-                                        : view.rdoMale.isSelected() ? "Male" : "Others",
+                                : view.rdoMale.isSelected() ? "Male" : "Others",
                                 Integer.parseInt(view.txtAge.getText()), view.txtAddress.getText().trim(),
                                 view.chkStudent.isSelected());
+                                view.showMessage("Data saved successfully...", true
+                        
+                     );
                     } catch (NumberFormatException e1) {
                         e1.printStackTrace();
                     } catch (ClassNotFoundException e1) {

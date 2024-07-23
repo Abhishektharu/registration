@@ -1,8 +1,14 @@
+
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class RegistrationView {
+
     JFrame frmMain;
     JLabel lblName, lblGender, lblAge, lblAddress, lblEmpty;
     JCheckBox chkStudent;
@@ -21,7 +27,46 @@ public class RegistrationView {
     Font lblFont = new Font("Arial", Font.BOLD, 12);
     Font txtFont = new Font("Arial", Font.BOLD + Font.ITALIC, 12);
 
-    public RegistrationView() {
+
+    //message dialog
+    public void showMessage(String message, boolean  closeFrame) {
+        JOptionPane.showMessageDialog(frmMain, message);
+        if (closeFrame) {
+            frmMain.dispose();
+        }
+    }
+
+    static DefaultTableModel tableModel = null;
+    public static DefaultTableModel getTableDataModel() throws SQLException, ClassNotFoundException {
+
+        String strQry = "select * from persons";
+        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(strQry); ResultSet rs = statement.executeQuery(strQry)) {
+
+            // Extract column names
+            int columnCount = rs.getMetaData().getColumnCount();
+            String[] columnNames = new String[columnCount];
+            for (int i = 1; i <= columnCount; i++) {
+                columnNames[i - 1] = rs.getMetaData().getColumnName(i);
+            }
+
+            // Extract data
+            tableModel = new DefaultTableModel(columnNames, 0);
+            while (rs.next()) {
+                Object[] rowData = new Object[columnCount];
+                for (int i = 1; i <= columnCount; i++) {
+                    rowData[i - 1] = rs.getObject(i);
+                }
+                tableModel.addRow(rowData);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tableModel;
+    }
+
+    public RegistrationView() throws ClassNotFoundException, SQLException {
         frmMain = new JFrame("Registration Form");
         frmMain.setSize(new Dimension(450, 450));
         frmMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -82,10 +127,10 @@ public class RegistrationView {
         chkStudent.setFont(lblFont);
         chkStudent.setPreferredSize(dimLabel);
 
-        String[] colName = new String[] {"Name", "Gender", "Age", "Address", "Student?"};
-        Object[][] data = new Object[][] {};
+        String[] colName = new String[]{"Name", "Gender", "Age", "Address", "Student?"};
+        Object[][] data = new Object[][]{};
         defaultTableModel = new DefaultTableModel(data, colName);
-        tblData = new JTable(defaultTableModel);
+        tblData = new JTable(getTableDataModel());
         scrData = new JScrollPane(tblData);
         scrData.setPreferredSize(new Dimension(425, 150));
 
